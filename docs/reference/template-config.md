@@ -121,6 +121,7 @@ Example:
 
 Variables can be used in template files (files ending in `.tmpl`) using Go's template syntax:
 
+{% raw %}
 ```go
 // main.go.tmpl
 package main
@@ -130,6 +131,7 @@ func main() {
     println("Welcome to {{ .name }}!")
 }
 ```
+{% endraw %}
 
 ## Template File Processing
 

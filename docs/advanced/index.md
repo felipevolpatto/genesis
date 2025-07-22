@@ -39,6 +39,7 @@ You can create templates that extend other templates:
 
 Use Go template features for advanced customization:
 
+{% raw %}
 ```go
 // config.go.tmpl
 package config
@@ -62,6 +63,7 @@ type MySQLConfig struct {
 }
 {{- end }}
 ```
+{% endraw %}
 
 ### Conditional Files
 
@@ -224,6 +226,7 @@ post = [
 
 Genesis uses Go's template engine, which provides many built-in functions:
 
+{% raw %}
 ```go
 // template.go.tmpl
 package main
@@ -248,6 +251,7 @@ var Dependencies = []string{
 {{- end }}
 }
 ```
+{% endraw %}
 
 ## Security Considerations
 
