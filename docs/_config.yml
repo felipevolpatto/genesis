@@ -1,0 +1,27 @@
+remote_theme: just-the-docs/just-the-docs
+
+title: Genesis
+description: A powerful project scaffolding tool
+baseurl: "/genesis"
+url: "https://felipevolpatto.github.io"
+
+# Theme settings
+search_enabled: true
+heading_anchors: true
+
+# Aux links for the upper right navigation
+aux_links:
+  "Genesis on GitHub":
+    - "//github.com/felipevolpatto/genesis"
+
+# Makes Aux links open in a new tab
+aux_links_new_tab: true
+
+# Footer content
+footer_content: "Copyright &copy; 2024 Felipe Volpatto. Distributed under the MIT License."
+
+# Color scheme
+color_scheme: light
+
+# Google Analytics
+ga_tracking: false 
