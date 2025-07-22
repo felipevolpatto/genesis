@@ -32,6 +32,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -39,8 +41,14 @@ jobs:
           go-version: '1.21'
           cache: true
 
+      - name: Install dependencies
+        run: go mod download
+
       - name: Run tests
-        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+        run: |
+          go version
+          go env
+          go test -v -race -timeout 5m -coverprofile=coverage.txt -covermode=atomic ./...
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -73,6 +81,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v5

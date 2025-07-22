@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -43,28 +44,30 @@ func main() {
 	err = os.WriteFile(filepath.Join(templateDir, "main.go.tmpl"), []byte(mainTemplate), 0644)
 	require.NoError(t, err)
 
-	// Add and commit files
+	// Get the worktree
 	w, err := repo.Worktree()
 	require.NoError(t, err)
 
+	// Add all files
 	_, err = w.Add(".")
 	require.NoError(t, err)
 
+	// Create a commit
+	author := &object.Signature{
+		Name:  "Test Author",
+		Email: "test@example.com",
+		When:  time.Now(),
+	}
+
 	commit, err := w.Commit("Initial commit", &git.CommitOptions{
-		Author: &object.Signature{
-			Name:  "Test Author",
-			Email: "test@example.com",
-		},
+		Author: author,
 	})
 	require.NoError(t, err)
 
 	// Create a tag
 	_, err = repo.CreateTag("v1.0.0", commit, &git.CreateTagOptions{
+		Tagger:  author,
 		Message: "Version 1.0.0",
-		Tagger: &object.Signature{
-			Name:  "Test Author",
-			Email: "test@example.com",
-		},
 	})
 	require.NoError(t, err)
 
@@ -108,7 +111,7 @@ func TestNewCommand(t *testing.T) {
 				"test-project",
 			},
 			expectError: true,
-			setup:      func(t *testing.T) error {
+			setup: func(t *testing.T) error {
 				templateURL = "" // Reset template URL
 				return nil
 			},
@@ -207,12 +210,22 @@ func TestNewCommandWithVersion(t *testing.T) {
 	// Execute command
 	rootCmd.SetArgs(args)
 	err = rootCmd.Execute()
-
-	// Since we're using a local directory, version flag should be ignored
 	assert.NoError(t, err)
 
 	// Check if project was created
 	projectPath := filepath.Join(projectDir, "test-project")
 	_, err = os.Stat(projectPath)
 	assert.NoError(t, err)
+
+	// Check if files were created
+	files := []string{
+		"main.go",
+		"genesis.toml",
+		"post-hook.txt",
+	}
+
+	for _, file := range files {
+		_, err = os.Stat(filepath.Join(projectPath, file))
+		assert.NoError(t, err)
+	}
 } 
