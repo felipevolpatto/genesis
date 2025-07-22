@@ -48,13 +48,7 @@ jobs:
         run: |
           go version
           go env
-          go test -v -race -timeout 5m -coverprofile=coverage.txt -covermode=atomic ./...
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./coverage.txt
-          fail_ci_if_error: true
+          go test -v -race -timeout 5m ./...
 
   build:
     name: Build
