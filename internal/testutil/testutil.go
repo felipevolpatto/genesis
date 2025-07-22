@@ -34,7 +34,9 @@ func CaptureOutput(f func()) string {
 
 	// Read the output
 	var buf bytes.Buffer
-	io.Copy(&buf, r)
+	if _, err := io.Copy(&buf, r); err != nil {
+		panic(err)
+	}
 
 	return buf.String()
 } 

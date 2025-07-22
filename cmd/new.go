@@ -33,7 +33,9 @@ Template files ending in .tmpl will be processed using Go's text/template packag
 	newCmd.Flags().BoolVarP(&skipPrompts, "yes", "y", false, "Skip all prompts and use default values")
 	newCmd.Flags().StringVarP(&version, "version", "v", "", "Template version (tag, branch, or commit hash)")
 
-	newCmd.MarkFlagRequired("template")
+	if err := newCmd.MarkFlagRequired("template"); err != nil {
+		panic(fmt.Sprintf("failed to mark template flag as required: %v", err))
+	}
 	rootCmd.AddCommand(newCmd)
 }
 
@@ -50,7 +52,11 @@ func runNew(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to clone repository: %w", err)
 	}
-	defer scaffolder.CleanupTemplate(templateDir)
+	defer func() {
+		if err := scaffolder.CleanupTemplate(templateDir); err != nil {
+			fmt.Fprintf(cmd.ErrOrStderr(), "Warning: failed to cleanup template directory: %v\n", err)
+		}
+	}()
 
 	// Parse template config
 	templateConfig, err := config.ParseTemplateConfig(filepath.Join(templateDir, "template.toml"))

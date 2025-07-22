@@ -10,67 +10,85 @@ import (
 
 // Variable represents a template variable with its prompt and default value
 type Variable struct {
-	Prompt   string `toml:"prompt"`
-	Default  string `toml:"default"`
-	Regex    string `toml:"regex,omitempty"`
+	Prompt  string
+	Default string
+	Regex   string
 }
 
-// TemplateConfig represents the structure of a template.toml file
+// Hooks represents pre and post scaffolding hooks
+type Hooks struct {
+	Pre  []string
+	Post []string
+}
+
+// TemplateConfig represents the configuration for a template
 type TemplateConfig struct {
-	Version string              `toml:"version"`
-	Vars    map[string]Variable `toml:"vars"`
-	Hooks   struct {
-		Pre  []string `toml:"pre,omitempty"`
-		Post []string `toml:"post,omitempty"`
-	} `toml:"hooks"`
+	Version string
+	Vars    map[string]Variable
+	Hooks   Hooks
 }
 
-// Task represents a runnable task in genesis.toml
+// Project represents project-specific configuration
+type Project struct {
+	TemplateURL     string `toml:"template_url"`
+	TemplateVersion string `toml:"template_version"`
+}
+
+// Task represents a runnable task
 type Task struct {
-	Description string `toml:"description"`
-	Cmd        string `toml:"cmd"`
+	Description string
+	Cmd        string
+	Env        map[string]string
+	Dir        string
 }
 
-// ProjectConfig represents the structure of a genesis.toml file
+// ProjectConfig represents the configuration for a project
 type ProjectConfig struct {
-	Version string `toml:"version"`
-	Project struct {
-		TemplateURL     string `toml:"template_url"`
-		TemplateVersion string `toml:"template_version"`
-	} `toml:"project"`
-	Tasks map[string]Task `toml:"tasks"`
+	Version string
+	Project Project
+	Tasks   map[string]Task
 }
 
-// ParseTemplateConfig reads and parses a template.toml file
+// ParseTemplateConfig parses a template.toml file
 func ParseTemplateConfig(path string) (*TemplateConfig, error) {
 	var config TemplateConfig
 	if _, err := toml.DecodeFile(path, &config); err != nil {
 		return nil, fmt.Errorf("failed to parse template config: %w", err)
 	}
+
+	if config.Version == "" {
+		return nil, fmt.Errorf("template config must specify a version")
+	}
+
 	return &config, nil
 }
 
-// ParseProjectConfig reads and parses a genesis.toml file
+// ParseProjectConfig parses a genesis.toml file
 func ParseProjectConfig(path string) (*ProjectConfig, error) {
 	var config ProjectConfig
 	if _, err := toml.DecodeFile(path, &config); err != nil {
 		return nil, fmt.Errorf("failed to parse project config: %w", err)
 	}
+
+	if config.Version == "" {
+		return nil, fmt.Errorf("project config must specify a version")
+	}
+
 	return &config, nil
 }
 
-// FindProjectConfig searches for genesis.toml in the current directory and parent directories
-func FindProjectConfig() (*ProjectConfig, string, error) {
+// FindProjectConfig searches for a genesis.toml file in the current directory
+// and its parents. Returns the path to the config file if found.
+func FindProjectConfig() (string, error) {
 	dir, err := os.Getwd()
 	if err != nil {
-		return nil, "", fmt.Errorf("failed to get working directory: %w", err)
+		return "", fmt.Errorf("failed to get current directory: %w", err)
 	}
 
 	for {
 		configPath := filepath.Join(dir, "genesis.toml")
 		if _, err := os.Stat(configPath); err == nil {
-			config, err := ParseProjectConfig(configPath)
-			return config, dir, err
+			return configPath, nil
 		}
 
 		parent := filepath.Dir(dir)
@@ -80,5 +98,5 @@ func FindProjectConfig() (*ProjectConfig, string, error) {
 		dir = parent
 	}
 
-	return nil, "", fmt.Errorf("no genesis.toml found in current directory or any parent directories")
+	return "", fmt.Errorf("no genesis.toml found in current directory or its parents")
 } 

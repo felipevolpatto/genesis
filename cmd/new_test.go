@@ -133,10 +133,18 @@ func TestNewCommand(t *testing.T) {
 			// Change to the test directory
 			currentDir, err := os.Getwd()
 			require.NoError(t, err)
-			defer os.Chdir(currentDir)
 
-			err = os.Chdir(projectDir)
-			require.NoError(t, err)
+			// Create a deferred function to change back to the original directory
+			defer func() {
+				if err := os.Chdir(currentDir); err != nil {
+					t.Errorf("failed to change back to original directory: %v", err)
+				}
+			}()
+
+			// Change to the project directory
+			if err := os.Chdir(projectDir); err != nil {
+				t.Fatalf("failed to change to project directory: %v", err)
+			}
 
 			// Run setup if any
 			err = tt.setup(t)
@@ -197,10 +205,18 @@ func TestNewCommandWithVersion(t *testing.T) {
 	// Change to the test directory
 	currentDir, err := os.Getwd()
 	require.NoError(t, err)
-	defer os.Chdir(currentDir)
 
-	err = os.Chdir(projectDir)
-	require.NoError(t, err)
+	// Create a deferred function to change back to the original directory
+	defer func() {
+		if err := os.Chdir(currentDir); err != nil {
+			t.Errorf("failed to change back to original directory: %v", err)
+		}
+	}()
+
+	// Change to the project directory
+	if err := os.Chdir(projectDir); err != nil {
+		t.Fatalf("failed to change to project directory: %v", err)
+	}
 
 	// Create a buffer to capture output
 	buf := new(bytes.Buffer)

@@ -12,15 +12,11 @@ func init() {
 	runCmd := &cobra.Command{
 		Use:   "run [task-name]",
 		Short: "Run a task defined in genesis.toml",
-		Long: `Run a task defined in the genesis.toml configuration file.
+		Long: `Run a task defined in genesis.toml.
 
-Tasks are shell commands that can be executed in the context of your project.
-The genesis.toml file should be in the current directory or any parent directory.
-
-Example:
-  genesis run test     # Run the test task
-  genesis run build    # Run the build task`,
-		Args: cobra.ExactArgs(1),
+Tasks are defined in the project's genesis.toml file under the [tasks] section.
+Use 'run list' to see all available tasks.`,
+		Args: cobra.MinimumNArgs(1),
 		RunE: runTask,
 	}
 
@@ -30,30 +26,54 @@ Example:
 func runTask(cmd *cobra.Command, args []string) error {
 	taskName := args[0]
 
-	// Find and parse genesis.toml
-	projectConfig, projectDir, err := config.FindProjectConfig()
-	if err != nil {
-		return err
-	}
-
-	// Create runner
-	r := runner.New(projectConfig, projectDir)
-
-	// List tasks if requested
+	// Handle list command
 	if taskName == "list" {
-		tasks := r.ListTasks()
-		if len(tasks) == 0 {
-			fmt.Println("No tasks defined in genesis.toml")
-			return nil
-		}
-
-		fmt.Println("Available tasks:")
-		for _, task := range tasks {
-			fmt.Printf("  %s\n", task)
-		}
-		return nil
+		return listTasks(cmd)
 	}
 
-	// Run the requested task
-	return r.RunTask(taskName)
+	// Find and parse genesis.toml
+	configPath, err := config.FindProjectConfig()
+	if err != nil {
+		return fmt.Errorf("failed to find genesis.toml: %w", err)
+	}
+
+	projectConfig, err := config.ParseProjectConfig(configPath)
+	if err != nil {
+		return fmt.Errorf("failed to parse genesis.toml: %w", err)
+	}
+
+	// Find the task
+	task, ok := projectConfig.Tasks[taskName]
+	if !ok {
+		return fmt.Errorf("task %q not found", taskName)
+	}
+
+	// Run the task
+	r := runner.New()
+	if err := r.RunTask(task); err != nil {
+		return fmt.Errorf("failed to run task %q: %w", taskName, err)
+	}
+
+	return nil
+}
+
+func listTasks(cmd *cobra.Command) error {
+	// Find and parse genesis.toml
+	configPath, err := config.FindProjectConfig()
+	if err != nil {
+		return fmt.Errorf("failed to find genesis.toml: %w", err)
+	}
+
+	projectConfig, err := config.ParseProjectConfig(configPath)
+	if err != nil {
+		return fmt.Errorf("failed to parse genesis.toml: %w", err)
+	}
+
+	// List tasks
+	fmt.Fprintln(cmd.OutOrStdout(), "Available tasks:")
+	for name, task := range projectConfig.Tasks {
+		fmt.Fprintf(cmd.OutOrStdout(), "  %s: %s\n", name, task.Description)
+	}
+
+	return nil
 } 
