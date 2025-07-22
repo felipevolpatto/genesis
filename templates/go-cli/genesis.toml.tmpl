@@ -1,0 +1,14 @@
+# The version of the genesis config spec
+version = "1.0"
+
+[project]
+  template_url = "https://github.com/genesis/template-go-cli"
+  template_version = "v1.0.0"
+
+[tasks]
+  test = { description = "Run all unit tests", cmd = "go test ./..." }
+  build = { description = "Build the application binary", cmd = "go build -o {{ .binary }} main.go" }
+  lint = { description = "Lint the source code", cmd = "golangci-lint run" }
+  run = { description = "Run the application", cmd = "go run main.go" }
+  clean = { description = "Clean build artifacts", cmd = "rm -f {{ .binary }}" }
+  install = { description = "Install the application", cmd = "go install" } 

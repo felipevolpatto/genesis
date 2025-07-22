@@ -1,0 +1,17 @@
+# The version of the template spec
+version = "1.0"
+
+[vars]
+  name = { prompt = "Enter project name:", default = "my-cli" }
+  description = { prompt = "Enter project description:", default = "A new CLI application" }
+  author = { prompt = "Enter author name:", default = "Your Name" }
+  email = { prompt = "Enter author email:", default = "your.email@example.com" }
+  year = { prompt = "Enter copyright year:", default = "2024" }
+
+[hooks]
+  post = [
+    "go mod tidy",
+    "git init",
+    "git add .",
+    "git commit -m 'Initial commit from Genesis'"
+  ] 

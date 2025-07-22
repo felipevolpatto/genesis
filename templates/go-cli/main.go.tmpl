@@ -1,0 +1,27 @@
+package main
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/spf13/cobra"
+)
+
+var rootCmd = &cobra.Command{
+	Use:   "{{ .name }}",
+	Short: "{{ .description }}",
+	Long: `{{ .description }}
+
+Created by {{ .author }} <{{ .email }}>`,
+}
+
+func Execute() error {
+	return rootCmd.Execute()
+}
+
+func main() {
+	if err := Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+} 
