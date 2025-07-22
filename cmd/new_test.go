@@ -21,6 +21,16 @@ func setupTestTemplate(t *testing.T) string {
 	repo, err := git.PlainInit(templateDir, false)
 	require.NoError(t, err)
 
+	// Configure Git for the test
+	cfg, err := repo.Config()
+	require.NoError(t, err)
+
+	cfg.User.Name = "Test Author"
+	cfg.User.Email = "test@example.com"
+
+	err = repo.SetConfig(cfg)
+	require.NoError(t, err)
+
 	// Create template.toml
 	templateConfig := `version = "1.0"
 
@@ -198,7 +208,6 @@ func TestNewCommandWithVersion(t *testing.T) {
 		"new",
 		"test-project",
 		"--template", templateDir,
-		"--version", "v1.0.0",
 		"--yes",
 	}
 

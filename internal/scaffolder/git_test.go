@@ -21,6 +21,16 @@ func setupTestRepo(t *testing.T) (string, plumbing.Hash) {
 	repo, err := git.PlainInit(tempDir, false)
 	require.NoError(t, err)
 
+	// Configure Git for the test
+	cfg, err := repo.Config()
+	require.NoError(t, err)
+
+	cfg.User.Name = "Test Author"
+	cfg.User.Email = "test@example.com"
+
+	err = repo.SetConfig(cfg)
+	require.NoError(t, err)
+
 	// Create template.toml
 	err = os.WriteFile(filepath.Join(tempDir, "template.toml"), []byte("version = \"1.0\""), 0644)
 	require.NoError(t, err)
@@ -157,6 +167,16 @@ func TestCloneTemplateWithoutTemplateToml(t *testing.T) {
 	repo, err := git.PlainInit(tempDir, false)
 	require.NoError(t, err)
 
+	// Configure Git for the test
+	cfg, err := repo.Config()
+	require.NoError(t, err)
+
+	cfg.User.Name = "Test Author"
+	cfg.User.Email = "test@example.com"
+
+	err = repo.SetConfig(cfg)
+	require.NoError(t, err)
+
 	// Create a dummy file
 	err = os.WriteFile(filepath.Join(tempDir, "dummy.txt"), []byte("test"), 0644)
 	require.NoError(t, err)
@@ -170,11 +190,14 @@ func TestCloneTemplateWithoutTemplateToml(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create a commit
+	author := &object.Signature{
+		Name:  "Test Author",
+		Email: "test@example.com",
+		When:  time.Now(),
+	}
+
 	_, err = w.Commit("Initial commit", &git.CommitOptions{
-		Author: &object.Signature{
-			Name:  "Test Author",
-			Email: "test@example.com",
-		},
+		Author: author,
 	})
 	require.NoError(t, err)
 

@@ -56,11 +56,11 @@ func listTemplates(cmd *cobra.Command, args []string) error {
 		},
 	}
 
-	fmt.Println("Available templates:")
+	fmt.Fprintln(cmd.OutOrStdout(), "Available templates:")
 	for _, t := range templates {
-		fmt.Printf("\n%s\n", t.Name)
-		fmt.Printf("  URL: %s\n", t.URL)
-		fmt.Printf("  Description: %s\n", t.Description)
+		fmt.Fprintf(cmd.OutOrStdout(), "\n%s\n", t.Name)
+		fmt.Fprintf(cmd.OutOrStdout(), "  URL: %s\n", t.URL)
+		fmt.Fprintf(cmd.OutOrStdout(), "  Description: %s\n", t.Description)
 	}
 
 	return nil
@@ -114,12 +114,12 @@ func validateTemplate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Printf("Template in %s is valid\n", templatePath)
-	fmt.Printf("Variables defined:\n")
+	fmt.Fprintf(cmd.OutOrStdout(), "Template in %s is valid\n", templatePath)
+	fmt.Fprintf(cmd.OutOrStdout(), "Variables defined:\n")
 	for name, v := range templateConfig.Vars {
-		fmt.Printf("  %s\n    Prompt: %s\n    Default: %s\n", name, v.Prompt, v.Default)
+		fmt.Fprintf(cmd.OutOrStdout(), "  %s\n    Prompt: %s\n    Default: %s\n", name, v.Prompt, v.Default)
 		if v.Regex != "" {
-			fmt.Printf("    Validation: %s\n", v.Regex)
+			fmt.Fprintf(cmd.OutOrStdout(), "    Validation: %s\n", v.Regex)
 		}
 	}
 
